@@ -12,12 +12,11 @@ querystring = {"lon":"9.188","lat":"45.464"}
 
 # Lat and Lon correspond to Milan, taken from https://www.latlong.net/place/milan-lombardy-italy-27241.html
 
-headers = {
-	"x-rapidapi-key": "1bfb9b4632msh4e1551fe30d9159p1f5563jsnf121f0b0713c",
-	"x-rapidapi-host": "air-quality.p.rapidapi.com"
-}
+with open("API_keys.json") as api_keys_file:
+    api_keys = json.load(api_keys_file)
 
-response = requests.get(url, headers=headers, params=querystring)
+
+response = requests.get(url, headers=api_keys, params=querystring)
 
 print(response.json())
 
