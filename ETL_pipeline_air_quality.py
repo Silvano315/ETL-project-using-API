@@ -5,6 +5,7 @@ import plotly.graph_objects as go
 import os
 import time
 import schedule
+import threading
 import requests
 import json
 
@@ -212,7 +213,19 @@ def etl_process():
 # Plan execution every 24 hours
 schedule.every(24).hours.do(etl_process)
 
-# Execute pipeline continously
+# Execute pipeline continously with interruption options
+def run_scheduler():
+    while not stop_thread:  
+        schedule.run_pending()
+        time.sleep(1)
+
+stop_thread = False 
+scheduler_thread = threading.Thread(target=run_scheduler)
+scheduler_thread.start()
 while True:
-    schedule.run_pending()
-    time.sleep(1)
+    user_input = input("Digit 'exit' to interrupt the pipeline: ").strip().lower()
+    if user_input == 'exit':
+        stop_thread = True 
+        scheduler_thread.join() 
+        print("Pipeline correctly interrupted.")
+        break
