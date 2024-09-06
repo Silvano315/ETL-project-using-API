@@ -35,7 +35,7 @@ def extract_data_from_api(api_keys_path="API_keys.json", output_file_path="Data/
             df = pd.concat([df, data], axis=1)  
         df.to_csv(output_file_path, index=False)
 
-        print(f"Normalized data successfully saved to {output_file_path}")
+        print(f"Data successfully saved to {output_file_path}")
         return df  
     else:
         print(f"Request failed with status code {response.status_code}")
@@ -48,7 +48,7 @@ def clean_data(df):
     print(f"DataFrame Shape before checking missing values: {df.shape}")
     missing_values = df.isnull().sum()
     if missing_values.any():
-        print("\BE CAREFULL!! There are missing values in the following columns:")
+        print("BE CAREFULL!! There are missing values in the following columns:")
         print(missing_values[missing_values > 0])
     else:
         print("\nNo duplicates found in this DataFrame.")
@@ -77,31 +77,36 @@ def clean_data(df):
     for col in df.columns:
         if df[col].nunique() == 1:
             df.drop(columns=[col], inplace=True)
-            print(f"\Column '{col}' dropped because with only unique value.")
+            print(f"\nColumn '{col}' dropped because with only unique value.")
 
     if 'datetime' in df.columns:
         df.drop(columns='datetime', inplace=True)
-        print("\Column 'datetime' dropped.")
+        print("\nColumn 'datetime' dropped.")
     else:
-        print("\Column 'datetime' not found, not action done.")
+        print("\nColumn 'datetime' not found, not action done.")
 
     return df
 
 # Function to transform data
 def transform_data(df):
+    print("Adding separated time columns: year, month, day, hour\n")
     df['year'] = df['timestamp_local'].dt.year
     df['month'] = df['timestamp_local'].dt.month
     df['day'] = df['timestamp_local'].dt.day
     df['hour'] = df['timestamp_local'].dt.hour
 
+    print("Creating Time Index with timestamp_local\n")
     df.set_index('timestamp_local', inplace=True)
 
+    print("Adding a derived feature: Pollutant Ratio Features\n")
     df['pm10_pm25_ratio'] = round(df['pm10'] / df['pm25'], 2)
     df['no2_o3_ratio'] = round(df['no2'] / df['o3'], 2)
     df['co_so2_ratio'] = round(df['co'] / df['so2'], 2)
 
     df = df[['aqi', 'co', 'no2', 'o3', 'pm10', 'pm25', 'so2', 'pm10_pm25_ratio', 'no2_o3_ratio', 'co_so2_ratio', 'timestamp_utc', 'ts',
            'year', 'month', 'day', 'hour']]
+    
+    print("New columns:\n", df.columns)
 
     return df
 
@@ -118,6 +123,7 @@ def save_transformed_data(df, file_path='Data/Milan_Air_Quality_Transformed.csv'
 # Function to visualize and save plots
 def create_and_save_visualizations(df, feature_to_viz = 'aqi', scatter_x = 'pm10', scatter_y = 'pm25'):
     # Histogram with Mean and Standard Deviation
+    print("Saving Histogram with Mean and Standard Deviation\n")
     column = feature_to_viz
     mean_value = df[column].mean()
     std_value = df[column].std()
@@ -130,11 +136,13 @@ def create_and_save_visualizations(df, feature_to_viz = 'aqi', scatter_x = 'pm10
     fig_histogram.write_html(f'Images/Air_Quality/{feature_to_viz}_histogram.html')  
 
     # Box Plot
+    print(f"Saving Box Plot for {column}\n")
     fig_box = px.box(df, x=column, title=f'Box Plot of {column.capitalize()} by Category')
     fig_box.write_image('Images/Air_Quality/aqi_box_plot.png')  
     fig_box.write_html('Images/Air_Quality/aqi_box_plot.html')  
 
     # Correlation Matrix Heatmap
+    print(f"Saving Correlation Matrix Heatmap\n")
     correlation_matrix = df.corr()
     fig_heatmap = px.imshow(round(correlation_matrix, 2), title='Correlation Matrix Heatmap', color_continuous_scale='Magma',
                            aspect='auto', text_auto=True)
@@ -142,18 +150,21 @@ def create_and_save_visualizations(df, feature_to_viz = 'aqi', scatter_x = 'pm10
     fig_heatmap.write_html('Images/Air_Quality/correlation_matrix_heatmap.html')  
 
     # Time Series Plot
-    fig_time_series = px.area(df, x='timestamp_local', y=feature_to_viz, title=f'Time Series of {feature_to_viz} with Rangeslider')
+    print(f"Saving Time Series Plot for {feature_to_viz}\n")
+    fig_time_series = px.area(df, x=df.index.values, y=feature_to_viz, title=f'Time Series of {feature_to_viz} with Rangeslider')
     fig_time_series.update_xaxes(minor=dict(ticks="inside", showgrid=True))
     fig_time_series.update_xaxes(rangeslider_visible=True)
     fig_time_series.write_image(f'Images/Air_Quality/time_series_{feature_to_viz}_plot.png')  
     fig_time_series.write_html(f'Images/Air_Quality/time_series_{feature_to_viz}_plot.html') 
 
     # Scatter Plot with Regression Line
+    print(f"Saving Scatter Plot with Regression Line for {scatter_x} vs {scatter_y}\n")
     fig_scatter = px.scatter(df, x=scatter_x, y=scatter_y, title='Scatter Plot with Regression Line')
     fig_scatter.write_image(f'Images/Air_Quality/scatter_plot_{scatter_x}_vs_{scatter_y}.png')  
     fig_scatter.write_html(f'Images/Air_Quality/scatter_plot_{scatter_x}_vs_{scatter_y}.html')  
 
     # Distribution Plot with KDE and Histogram
+    print(f"Saving Distribution Plot with KDE and Histogram\n")
     df_numeric = df.select_dtypes(include='number')
     features = df_numeric.columns
 
@@ -198,20 +209,47 @@ def create_and_save_visualizations(df, feature_to_viz = 'aqi', scatter_x = 'pm10
 
 # Main ETL pipeline
 def etl_process():
+    print("\n")
+    print("="*50)
+    print("Starting data extraction...\n")
     df = extract_data_from_api()
+    print("\nData extraction completed!")
+    print("="*50)
+    print("\n")
 
+    print("="*50)
+    print("Starting data cleaning...\n")
     df = clean_data(df)
+    print("\nData cleaning completed!")  
+    print("="*50)
+    print("\n")
 
+    print("="*50)
+    print("Saving transformed data...\n")
     df = transform_data(df)
+    print("\nTransformed data saved!")
+    print("="*50)
+    print("\n")
 
+    print("="*50)
+    print("Saving transformed data...\n")
     save_transformed_data(df)
+    print("\nTransformed data saved!\n")
+    print("="*50)
+    print("\n")
 
+    print("="*50)
+    print("Saving visualizations...\n")
     create_and_save_visualizations(df)
+    print("\nVisualizations saved!\n")
+    print("="*50)
 
     print("ETL process completed successfully.")
+    print("Digit 'exit' to interrupt the pipeline: ")
 
 # Plan execution every 24 hours
-schedule.every(24).hours.do(etl_process)
+#schedule.every(24).hours.do(etl_process)
+schedule.every(60).seconds.do(etl_process)
 
 # Execute pipeline continously with interruption options
 def run_scheduler():
