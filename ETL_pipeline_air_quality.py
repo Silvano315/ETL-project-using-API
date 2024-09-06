@@ -152,7 +152,7 @@ def create_and_save_visualizations(df, feature_to_viz = 'aqi', scatter_x = 'pm10
     # Time Series Plot
     print(f"Saving Time Series Plot for {feature_to_viz}\n")
     fig_time_series = px.area(df, x=df.index.values, y=feature_to_viz, title=f'Time Series of {feature_to_viz} with Rangeslider')
-    fig_time_series.update_xaxes(minor=dict(ticks="inside", showgrid=True))
+    fig_time_series.update_xaxes(title_text='Timestamp (Local Time)', minor=dict(ticks="inside", showgrid=True))
     fig_time_series.update_xaxes(rangeslider_visible=True)
     fig_time_series.write_image(f'Images/Air_Quality/time_series_{feature_to_viz}_plot.png')  
     fig_time_series.write_html(f'Images/Air_Quality/time_series_{feature_to_viz}_plot.html') 
@@ -234,22 +234,23 @@ def etl_process():
     print("="*50)
     print("Saving transformed data...\n")
     save_transformed_data(df)
-    print("\nTransformed data saved!\n")
+    print("\nTransformed data saved!")
     print("="*50)
     print("\n")
 
     print("="*50)
     print("Saving visualizations...\n")
+    # Need to DO: implement user's choices for visualization or adding interactive box for choosing feature to viz
     create_and_save_visualizations(df)
-    print("\nVisualizations saved!\n")
+    print("\nVisualizations saved!")
     print("="*50)
 
     print("ETL process completed successfully.")
     print("Digit 'exit' to interrupt the pipeline: ")
 
-# Plan execution every 24 hours
-#schedule.every(24).hours.do(etl_process)
-schedule.every(60).seconds.do(etl_process)
+# Plan execution every 24 hours or test it with every 15 seconds
+schedule.every(24).hours.do(etl_process)
+#schedule.every(15).seconds.do(etl_process)
 
 # Execute pipeline continously with interruption options
 def run_scheduler():
