@@ -101,6 +101,10 @@ After the data is transformed, it is saved in a CSV format. This ensures that th
 - Combining new transformed data with existing datasets to create a comprehensive and up-to-date record.
 - Saving the updated data to a designated file location for easy access.
 
+I also implemented a saving Data to SQLite Database:
+- The transformed data is also appended to an existing `SQLite` database using `sqlite3` library. This allows for persistent storage and efficient querying of large datasets.
+- The function is used to save the DataFrame (`df`) to the specified SQLite database [file](Data/air_quality.db). If the table already exists, new data is appended to it, ensuring that existing data is preserved and updated.
+
 ### 5. Data Visualization
 
 To provide a more intuitive understanding of air quality trends and pollution levels, the pipeline includes a robust visualization component. Using the Plotly library, the following visualizations are generated and saved:
