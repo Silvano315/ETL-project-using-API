@@ -8,6 +8,7 @@ import schedule
 import threading
 import requests
 import json
+import sqlite3
 
 
 # Function to extract data from API
@@ -119,6 +120,17 @@ def save_transformed_data(df, file_path='Data/Milan_Air_Quality_Transformed.csv'
     else:
         df.to_csv(file_path)
     print(f"Data saved to {file_path}")
+
+# Function to create a connection to the SQLite database and save the DataFrame to the SQL database
+def save_data_to_sql(df, db_path='Data/air_quality.db', table_name='air_quality'):
+    conn = sqlite3.connect(db_path)
+    try:
+        df.to_sql(table_name, conn, if_exists='append', index=False)
+        print(f"Data successfully saved to SQL table '{table_name}' in database '{db_path}'")
+    except Exception as e:
+        print(f"An error occurred: {e}")
+    finally:
+        conn.close()
 
 # Function to visualize and save plots
 def create_and_save_visualizations(df, feature_to_viz = 'aqi', scatter_x = 'pm10', scatter_y = 'pm25'):
@@ -239,6 +251,13 @@ def etl_process():
     print("\n")
 
     print("="*50)
+    print("Saving transformed data to SQL...\n")
+    save_data_to_sql(df)
+    print("\nTransformed data saved to SQL!")
+    print("="*50)
+    print("\n")
+
+    print("="*50)
     print("Saving visualizations...\n")
     # Need to DO: implement user's choices for visualization or adding interactive box for choosing feature to viz
     create_and_save_visualizations(df)
@@ -249,8 +268,8 @@ def etl_process():
     print("Digit 'exit' to interrupt the pipeline: ")
 
 # Plan execution every 24 hours or test it with every 15 seconds
-schedule.every(24).hours.do(etl_process)
-#schedule.every(15).seconds.do(etl_process)
+#schedule.every(24).hours.do(etl_process)
+schedule.every(15).seconds.do(etl_process)
 
 # Execute pipeline continously with interruption options
 def run_scheduler():
