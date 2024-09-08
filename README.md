@@ -1,2 +1,19 @@
 # ETL-project-using-API
-This project involves selecting an API from RapidAPI and using Python to extract data in JSON format. The extracted data is then cleaned and transformed by parsing only the necessary information. Finally, the cleaned data is loaded into an SQL database for further analysis.
+
+## Table of Contents
+1. [Introduction](#introduction)
+2. [Data from Rapid-Api](#data-from-rapid-api)
+3. [Python Pipeline for Air Quality Monitoring](#python-pipeline-air-quality-monitoring)
+4. [Requirements](#requirements)
+
+
+## Introduction
+
+
+## Data from Rapid API
+
+
+## Python Pipeline for Air Quality Monitoring
+
+
+## Requirements
